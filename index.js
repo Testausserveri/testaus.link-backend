@@ -32,10 +32,13 @@ app.post('/new', async (req, res) => {
     },
   });
 
-  console.log(link);
-
   if (!link) {
     const short = nanoid(6);
+
+    while (await prisma.link.findFirst({ where: { short: short } })) {
+      short = nanoid(6);
+    }
+
     await prisma.link.create({
       data: {
         long: req.body.url,
@@ -51,40 +54,42 @@ app.post('/new', async (req, res) => {
 
 app.get('/:short', async (req, res) => {
   const short = req.params.short.replace('?', '');
-  const link = await prisma.link.findFirst({
-    where: {
-      short: short,
-    },
-  });
-
-  if (req.originalUrl.endsWith('?')) {
+  if (/^[A-Za-z0-9_-]+$/.test(short)) {
     const link = await prisma.link.findFirst({
       where: {
         short: short,
       },
     });
 
-    if (link) {
-      res.send(link);
-    } else {
-      res.redirect('http://localhost:3000/404');
-    }
-
-    res.send();
-  } else if (link) {
-    res.redirect(link.long);
-    await prisma.link.update({
-      where: {
-        short: short,
-      },
-      data: {
-        clicks: {
-          increment: 1,
+    if (req.originalUrl.endsWith('?')) {
+      const link = await prisma.link.findFirst({
+        where: {
+          short: short,
         },
-      },
-    });
+      });
+
+      if (link) {
+        res.send(link);
+      } else {
+        res.redirect(`${process.env.FRONTEND_URL}/404`);
+      }
+    } else if (link) {
+      res.redirect(link.long);
+      await prisma.link.update({
+        where: {
+          short: short,
+        },
+        data: {
+          clicks: {
+            increment: 1,
+          },
+        },
+      });
+    } else {
+      res.redirect(`${process.env.FRONTEND_URL}/404`);
+    }
   } else {
-    res.redirect('http://localhost:3000/404');
+    res.sendStatus(400);
   }
 });
 
