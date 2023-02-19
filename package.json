@@ -1,0 +1,23 @@
+{
+  "name": "testaus.link",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^4.10.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^6.0.1",
+    "nanoid": "^4.0.1"
+  },
+  "devDependencies": {
+    "prisma": "^4.10.1"
+  }
+}
