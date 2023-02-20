@@ -4,8 +4,8 @@ COPY package.json .
 COPY package-lock.json .
 COPY prisma prisma
 RUN npm ci
+RUN npm install --location=global prisma
 COPY tsconfig.json .
 COPY src src
 RUN npm run tsc
-RUN npm install --location=global prisma
 CMD ["npm", "run", "start:prod"]
