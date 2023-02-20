@@ -47,12 +47,12 @@ app.post('/new', async (req, res) => {
           createdAt: new Date().toUTCString(),
         },
       });
-      res.send(short);
+      res.send({ short: short });
     } else {
-      res.send(link.short);
+      res.send({ short: link.short });
     }
   } else {
-    res.status(400).send('URL cannot be undefined');
+    res.status(400).send({ error: 'URL cannot be undefined' });
   }
 });
 
@@ -93,7 +93,7 @@ app.get('/:short', async (req, res) => {
       res.redirect(`${process.env.FRONTEND_URL}/404`);
     }
   } else {
-    res.sendStatus(400);
+    res.redirect(`${process.env.FRONTEND_URL}/404`);
   }
 });
 
