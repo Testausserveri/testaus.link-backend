@@ -1,6 +1,6 @@
 import express from 'express';
 const app = express();
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv'
 dotenv.config();
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
@@ -10,8 +10,8 @@ import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 
 const limiter = rateLimit({
-  windowMs: process.env.RATELIMIT_WINDOW,
-  max: process.env.RATELIMIT_MAX,
+  windowMs: process.env.RATELIMIT_WINDOW ? Number(process.env.RATELIMIT_WINDOW) : undefined,
+  max: process.env.RATELIMIT_MAX ? Number(process.env.RATELIMIT_MAX) : undefined,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -25,8 +25,8 @@ app.use(
   })
 );
 
-app.post('/new', async (req, res) => {
-  if (req.body.url) {
+app.post<unknown, unknown, unknown, unknown>('/new', async (req, res) => {
+  if (typeof req.body === "object" && req.body && "url" in req.body && typeof req.body.url === "string" && req.body.url) {
     const link = await prisma.link.findFirst({
       where: {
         long: req.body.url,
@@ -34,7 +34,7 @@ app.post('/new', async (req, res) => {
     });
 
     if (!link) {
-      const short = nanoid(6);
+      let short = nanoid(6);
 
       while (await prisma.link.findFirst({ where: { short: short } })) {
         short = nanoid(6);
