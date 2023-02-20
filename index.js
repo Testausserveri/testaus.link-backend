@@ -26,29 +26,33 @@ app.use(
 );
 
 app.post('/new', async (req, res) => {
-  const link = await prisma.link.findFirst({
-    where: {
-      long: req.body.url,
-    },
-  });
-
-  if (!link) {
-    const short = nanoid(6);
-
-    while (await prisma.link.findFirst({ where: { short: short } })) {
-      short = nanoid(6);
-    }
-
-    await prisma.link.create({
-      data: {
+  if (req.body.url) {
+    const link = await prisma.link.findFirst({
+      where: {
         long: req.body.url,
-        short: short,
-        createdAt: new Date().toUTCString(),
       },
     });
-    res.send(short);
+
+    if (!link) {
+      const short = nanoid(6);
+
+      while (await prisma.link.findFirst({ where: { short: short } })) {
+        short = nanoid(6);
+      }
+
+      await prisma.link.create({
+        data: {
+          long: req.body.url,
+          short: short,
+          createdAt: new Date().toUTCString(),
+        },
+      });
+      res.send(short);
+    } else {
+      res.send(link.short);
+    }
   } else {
-    res.send(link.short);
+    res.status(400).send('URL cannot be undefined');
   }
 });
 
