@@ -16,6 +16,8 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+app.set("trust proxy", "loopback, linklocal, uniquelocal");
+
 app.use(express.json());
 app.use(helmet());
 app.use(limiter);
