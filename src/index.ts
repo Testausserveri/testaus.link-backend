@@ -1,6 +1,6 @@
 import express from 'express';
 const app = express();
-import * as dotenv from 'dotenv'
+import * as dotenv from 'dotenv';
 dotenv.config();
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
@@ -26,7 +26,7 @@ app.use(
 );
 
 app.post<unknown, unknown, unknown, unknown>('/new', async (req, res) => {
-  if (typeof req.body === "object" && req.body && "url" in req.body && typeof req.body.url === "string" && req.body.url) {
+  if (typeof req.body === 'object' && req.body && 'url' in req.body && typeof req.body.url === 'string' && req.body.url) {
     const link = await prisma.link.findFirst({
       where: {
         long: req.body.url,
@@ -57,7 +57,7 @@ app.post<unknown, unknown, unknown, unknown>('/new', async (req, res) => {
 });
 
 app.get('/:short', async (req, res) => {
-  const short = req.params.short.replace('?', '');
+  const short = req.params.short.replace('+', '');
   if (/^[A-Za-z0-9_-]+$/.test(short)) {
     const link = await prisma.link.findFirst({
       where: {
@@ -65,7 +65,7 @@ app.get('/:short', async (req, res) => {
       },
     });
 
-    if (req.originalUrl.endsWith('?')) {
+    if (req.originalUrl.endsWith('+')) {
       const link = await prisma.link.findFirst({
         where: {
           short: short,
@@ -78,7 +78,12 @@ app.get('/:short', async (req, res) => {
         res.redirect(`${process.env.FRONTEND_URL}/404`);
       }
     } else if (link) {
-      res.redirect(link.long);
+      if (link.long.startsWith('https://') || link.long.startsWith('http://')) {
+        res.redirect(link.long);
+      } else {
+        res.redirect(`http://${link.long}`);
+      }
+
       await prisma.link.update({
         where: {
           short: short,
